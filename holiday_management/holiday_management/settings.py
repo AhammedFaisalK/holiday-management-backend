@@ -24,9 +24,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     # Third party apps
     'rest_framework',
     'corsheaders',
+
     # Local apps
     'holidays',
 ]
@@ -40,6 +42,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'query_counter.middleware.DjangoQueryCounterMiddleware',
+
 ]
 
 ROOT_URLCONF = 'holiday_management.urls'
@@ -121,6 +125,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
+
+QUERY_COUNTER = {
+    "DISPLAY_DUPLICATES": True,  # Display duplicate queries
+    "DISPLAY_TOTAL": True,      # Display total query count
+    "MIN_DURATION": 0.01,       # Log queries that exceed this duration
+}
+
 
 # Calendarific API settings
 CALENDARIFIC_API_KEY = os.getenv('CALENDARIFIC_API_KEY')

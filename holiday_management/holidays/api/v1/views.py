@@ -20,7 +20,11 @@ class HolidayView(views.APIView):
         """Get holidays based on query parameters"""
         serializer = HolidayRequestSerializer(data=request.GET)
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "status": "error",
+                "message": "Invalid request parameters",
+                "errors": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             country_code = serializer.validated_data['country_code']
@@ -29,8 +33,10 @@ class HolidayView(views.APIView):
             query = serializer.validated_data.get('query', '')
             holiday_type = serializer.validated_data.get('holiday_type', '')
 
+            # Get holidays from service
             holidays = self.service.get_holidays(country_code, year)
 
+            # Apply filters
             if month:
                 holidays = self.service.filter_holidays_by_month(country_code, year, month)
             if query:
@@ -40,10 +46,24 @@ class HolidayView(views.APIView):
 
             # Paginate results
             paginated_holidays = self.paginator.paginate_queryset(holidays, request)
-            return self.paginator.get_paginated_response(HolidaySerializer(paginated_holidays, many=True).data)
+
+            return self.paginator.get_paginated_response({
+                "status": "success",
+                "message": "Holidays retrieved successfully",
+                "holidays": HolidaySerializer(paginated_holidays, many=True).data
+            })
 
         except ValidationError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "status": "error",
+                "message": "Validation error",
+                "details": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
-            logger.error(f"Error processing holiday request: {str(e)}")
-            return Response({'error': 'An unexpected error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f"Error processing holiday request: {str(e)}", exc_info=True)
+            return Response({
+                "status": "error",
+                "message": "An unexpected error occurred",
+                "details": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
