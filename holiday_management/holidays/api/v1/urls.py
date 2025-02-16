@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import HolidayView
 
+app_name = "api_v1_holidays"
+
 urlpatterns = [
-    path('holidays/', HolidayView.as_view(), name='holidays'),
+    path('', HolidayView.as_view(), name='holidays'),
 ]
