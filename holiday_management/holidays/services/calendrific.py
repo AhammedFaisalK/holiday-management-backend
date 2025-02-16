@@ -50,7 +50,7 @@ class CalendarificService:
 
         # Try database cache
         try:
-            db_cache = HolidayCache.objects.get(country_code=country_code, year=year)
+            db_cache = HolidayCache.objects.only('data').get(country_code=country_code, year=year)
             cache.set(cache_key, db_cache.data, self.cache_timeout)
             return db_cache.data
         except HolidayCache.DoesNotExist:
